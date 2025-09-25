@@ -1,0 +1,106 @@
+<!--index.wxml-->
+<view class="container">
+  <canvas id="compress-canvas" type="2d" style="width: 0px; height: 0px; position: absolute; left: -9999px;"></canvas>
+
+  <view id="error-message" class="error-message">{{errorMessage}}</view>
+  <view>全程微信本地处理</view>
+  <view id="preview-container" class="preview-container" wx:if="{{showPreview}}">
+    <text class="section-title">预览</text>
+    <view class="image-preview">
+      <view class="preview-box">
+        <text class="preview-title">原始图片</text>
+        <!-- <image id="original-preview" src="{{originalImage}}" mode="aspectFit" class="preview-image"></image> -->
+        <text class="image-info">{{originalImageInfo}}</text>
+      </view>
+
+      <view class="preview-box">
+        <text class="preview-title">压缩后</text>
+        <!-- <image id="compressed-preview" src="{{compressedImage}}" mode="aspectFit" class="preview-image"></image> -->
+        <text class="image-info">{{compressedImageInfo}}</text>
+      </view>
+    </view>
+  </view>
+  
+  <view id="upload-area" class="upload-area" bindtap="selectImage" wx:if="{{showUpload}}">
+    <view class="upload-icon">📁</view>
+    <text class="upload-text">点击选择图片</text>
+    <text class="upload-subtext">支持 PNG、JPG 格式</text>
+  </view>
+
+  <view id="settings" class="settings">
+    <view class="image-info">{{imageInfo}}</view>
+    <view class="form-group">
+      <text class="form-label">压缩质量 (1-100)</text>
+      <view>
+        <slider id="quality" min="1" max="100" value="{{quality}}" activeColor="#3498db" backgroundColor="#ddd" bindchange="onQualityChange" disabled="{{disableSettings}}" />
+        <text id="quality-value" class="range-value">{{quality}}</text>
+      </view>
+    </view>
+
+    <view class="form-group">
+      <text class="form-label">目标文件大小 (KB)</text>
+      <input id="target-size" type="number" placeholder="输入目标大小（可选）" value="{{targetSize}}" bind:change="onTargetSizeChange" disabled="{{disableSettings}}" />
+      <text class="form-hint">设置目标大小后，系统会自动调整质量以接近此大小</text>
+    </view>
+
+    <!-- <view class="form-group">
+      <text class="form-label">输出格式</text>
+      <radio-group bindchange="onOutputFormatChange" disabled="{{disableSettings}}">
+        <label wx:for="{{outputFormats}}" wx:key="index">
+          <radio value="{{index}}" checked="{{index == outputFormatIndex}}"/>
+          <text>{{item}}</text>
+        </label>
+      </radio-group>
+    </view> -->
+
+    <view class="form-group">
+      <text class="form-label">尺寸调整</text>
+      <radio-group bindchange="onResizeOptionChange" disabled="{{disableSettings}}">
+        <label wx:for="{{resizeOptions}}" wx:key="index">
+          <radio value="{{index}}" checked="{{index == resizeOptionIndex}}"/>
+          <text>{{item}}</text>
+        </label>
+      </radio-group>
+    </view>
+
+    <view id="custom-size" class="form-group" wx:if="{{showCustomSize}}">
+      <view class="size-inputs">
+        <view class="input-item">
+          <text class="form-label">宽度 (像素)</text>
+          <input id="width" type="number" value="{{width}}" bind:change="onWidthChange" disabled="{{disableSettings}}" />
+        </view>
+        <view class="input-item">
+          <text class="form-label">高度 (像素)</text>
+          <input id="height" type="number" value="{{height}}" bind:change="onHeightChange" disabled="{{disableSettings}}" />
+        </view>
+      </view>
+      <view class="checkbox-group">
+        <checkbox id="maintain-ratio" checked="{{maintainRatio}}" bindtap="onMaintainRatioChange" disabled="{{disableSettings}}" />
+        <text>保持原始比例</text>
+      </view>
+    </view>
+
+    <view id="percentage-size" class="form-group" wx:if="{{showPercentageSize}}">
+      <text class="form-label">缩放比例 (%)</text>
+      <view class="range-group">
+        <slider id="scale-percentage" min="1" max="100" value="{{scalePercentage}}" activeColor="#3498db" backgroundColor="#ddd" bindchange="onScalePercentageChange" disabled="{{disableSettings}}" />
+        <text id="scale-value" class="range-value">{{scalePercentage}}</text>
+      </view>
+    </view>
+
+    <view class="button-container">
+      <button id="upload-btn" class="button upload-btn" bindtap="selectImage" disabled="{{isProcessing}}">
+        <block wx:if="{{!originalImage}}">选择图片</block>
+        <block wx:else>重新选择</block>
+      </button>
+      <button id="compress-btn" class="button compress-btn" bindtap="{{originalImage ? 'compressImage' : ''}}" disabled="{{isProcessing || !originalImage}}">
+        <block wx:if="{{isCompressing}}">压缩中...</block>
+        <block wx:elif="{{compressedImageInfo}}">重新压缩</block>
+        <block wx:else>压缩</block>
+      </button>
+      <button id="download-btn" class="button download-btn" bindtap="downloadImage" disabled="{{isProcessing || !compressedImageInfo}}">
+        下载
+      </button>
+    </view>
+  </view>
+</view>
